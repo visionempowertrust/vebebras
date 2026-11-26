@@ -1,0 +1,33 @@
+# Vision Empower Quiz Studio
+
+Create and publish multilingual tests, run timed or untimed attempts, and review and export submissions. The static frontend is in `dist/`. Supabase stores quizzes, attempts and results, authenticates test admins, and enforces deadlines and access rules.
+
+## Set up Supabase
+
+1. Sign in to the [project SQL editor](https://supabase.com/dashboard/project/echetmjifxcznzsrrnrz/sql/new) with a project role that can run migrations. Apply `supabase/migrations/202611260001_quiz_platform.sql` once. It creates the quiz schema, API functions, access rules, and a Cron job that finalizes expired attempts even if the browser is closed. A linked Supabase CLI can also apply it with `supabase db push`.
+2. In **Authentication → Users**, create a confirmed email/password user for each approved test administrator, or use an existing confirmed user. Use the Auth user UUID to grant access:
+
+   ```sql
+   insert into public.quiz_admins (user_id)
+   values ('REPLACE_WITH_AUTH_USER_UUID')
+   on conflict do nothing;
+   ```
+
+3. Open **Test Admins**, sign in, create a test, and save it as **Live** when ready. Smoke-test it from **Test Takers** and download the resulting CSV from the admin dashboard.
+
+Only the Supabase project URL and publishable key are used in the browser. Keep database passwords, Supabase Management API tokens and secret or service-role keys out of frontend source. Admins on the allowlist can manage all quizzes and view their results. Test takers enter a display name; submissions count attempts, since test takers do not authenticate.
+
+## Run and deploy
+
+Serve `dist/` with any static HTTP server. For example, run `npx serve dist` from the repository root. Use the URL printed by the server, since browser modules require an HTTP origin. For deployments, serve `dist/` over HTTPS. Hash-based routing works under a repository path and requires no server route rewrites.
+
+## Quiz behavior
+
+- Author in English, with optional Kannada or Hindi text for each quiz. The site language control changes the interface and available translated quiz text. Untranslated fields fall back to English.
+- Set a standard time limit in minutes. Before entering the questions, takers can select standard time, extra time, or an untimed attempt. Timed attempts submit the answers received by Supabase by the deadline. The timer and resulting elapsed time come from the server's timestamps.
+- Closing a quiz prevents new attempts. Attempts already started use a snapshot of its original questions and answer key.
+- Radio and checkbox questions use answer keys. Written questions can accept exact answers with case and whitespace normalization or be left for manual review. The CSV includes responses and the auto-graded score.
+
+## Accessibility checks before rollout
+
+Verify with your participants' screen readers and keyboard-only navigation, including skip navigation, editing and moving questions, errors on required questions, time announcements and choosing extra time. Check at 200% and 400% zoom and review the language and formatting of the actual quiz content.
