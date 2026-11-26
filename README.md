@@ -1,6 +1,6 @@
 # Vision Empower Quiz Studio
 
-Create and publish multilingual tests, run timed or untimed attempts, and review and export submissions. The static frontend is in `dist/`. Supabase stores quizzes, attempts and results, authenticates test admins, and enforces deadlines and access rules.
+Create and publish multilingual tests, run timed or untimed attempts, and review and export submissions. The landing page is `index.html` at the repository root and its frontend assets are in `dist/`. Supabase stores quizzes, attempts and results, authenticates test admins, and enforces deadlines and access rules.
 
 ## Set up Supabase
 
@@ -19,7 +19,9 @@ Only the Supabase project URL and publishable key are used in the browser. Keep 
 
 ## Run and deploy
 
-Serve `dist/` with any static HTTP server. For example, run `npx serve dist` from the repository root. Use the URL printed by the server, since browser modules require an HTTP origin. For deployments, serve `dist/` over HTTPS. Hash-based routing works under a repository path and requires no server route rewrites.
+Run `npx serve .` from the repository root and open the URL it prints. On GitHub Pages, choose **Settings → Pages → Deploy from a branch**, then select `main` and `/(root)`. GitHub Pages uses the root `index.html` and serves the existing frontend directly. Visitors can open a public deployment and browse tests without a ChatGPT account. Test admins sign in through Supabase.
+
+Deploy over HTTPS. Hash-based routing works under a repository path and requires no server route rewrites.
 
 ## Quiz behavior
 
