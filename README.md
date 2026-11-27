@@ -5,7 +5,7 @@ Create and publish multilingual tests, run timed or untimed attempts, and review
 ## Set up Supabase
 
 1. Sign in to the [project SQL editor](https://supabase.com/dashboard/project/echetmjifxcznzsrrnrz/sql/new) with a project role that can run migrations. Apply `supabase/migrations/202611260001_quiz_platform.sql` once. It creates the quiz schema, API functions, access rules, and a Cron job that finalizes expired attempts even if the browser is closed. A linked Supabase CLI can also apply it with `supabase db push`.
-2. In **Authentication → Users**, create a confirmed email/password user for each approved test administrator, or use an existing confirmed user. Use the Auth user UUID to grant access:
+2. In **Authentication → Users**, use **Create new user** with **Auto Confirm User** enabled to create the shared account `quiz-admin@vebebras.example`. Set its Supabase password to `QuizStudio-v1:<shared password>` (replace the placeholder with the exact password admins will type, keeping the prefix and omitting the angle brackets). The prefix accommodates Supabase's minimum password length. Use the Auth user UUID to grant this account access:
 
    ```sql
    insert into public.quiz_admins (user_id)
@@ -13,9 +13,9 @@ Create and publish multilingual tests, run timed or untimed attempts, and review
    on conflict do nothing;
    ```
 
-3. Open **Test Admins**, sign in, create a test, and save it as **Live** when ready. Smoke-test it from **Test Takers** and download the resulting CSV from the admin dashboard.
+3. Open **Test Admins** and enter the shared password by itself. Create a test and save it as **Live** when ready. Smoke-test it from **Test Takers** and download the resulting CSV from the admin dashboard.
 
-Only the Supabase project URL and publishable key are used in the browser. Keep database passwords, Supabase Management API tokens and secret or service-role keys out of frontend source. Admins on the allowlist can manage all quizzes and view their results. Test takers enter a display name; submissions count attempts, since test takers do not authenticate.
+The browser sends the prefixed password directly to Supabase Auth. Keep the shared password, database passwords, Supabase Management API tokens and secret or service-role keys out of frontend source. The shared account can manage all quizzes and view their results once it is on the allowlist. Test takers enter a display name, and submissions count attempts because test takers do not authenticate.
 
 ## Run and deploy
 

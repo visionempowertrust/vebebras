@@ -1,6 +1,8 @@
 const projectUrl = "https://echetmjifxcznzsrrnrz.supabase.co";
 const publishableKey = "sb_publishable_6IrZajpmKg-V4IgMbyy_-g_ZohTvZbM";
 const authKey = "ve.quiz.admin";
+const sharedAdminEmail = "quiz-admin@vebebras.example";
+const sharedAdminPasswordPrefix = "QuizStudio-v1:";
 
 export function readStorage(key) {
   try { return JSON.parse(sessionStorage.getItem(key)); } catch { return null; }
@@ -49,8 +51,11 @@ export function signedIn() {
   return Boolean(session);
 }
 
-export async function signIn(email, password) {
-  setSession(await request("/auth/v1/token?grant_type=password", { body: { email, password } }));
+export async function signIn(password) {
+  // Match the password format configured on the shared Supabase Auth user.
+  setSession(await request("/auth/v1/token?grant_type=password", {
+    body: { email: sharedAdminEmail, password: sharedAdminPasswordPrefix + password }
+  }));
 }
 
 export async function signOut() {

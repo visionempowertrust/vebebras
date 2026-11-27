@@ -63,9 +63,13 @@ function explainError(error) {
     "ಈ ಖಾತೆಗೆ ಪರೀಕ್ಷೆಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅನುಮತಿ ಇಲ್ಲ.",
     "इस खाते को परीक्षाएँ प्रबंधित करने की अनुमति नहीं है।");
   if (error.code === "invalid_credentials" || /invalid login/i.test(error.message)) return t(
-    "Check your email and password and try again.",
-    "ನಿಮ್ಮ ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಪರಿಶೀಲಿಸಿ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
-    "अपना ईमेल और पासवर्ड जाँचें और फिर कोशिश करें।");
+    "Check the admin password and try again.",
+    "ನಿರ್ವಾಹಕರ ಪಾಸ್‌ವರ್ಡ್ ಪರಿಶೀಲಿಸಿ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "प्रशासक का पासवर्ड जाँचें और फिर कोशिश करें।");
+  if (error.status === 429) return t(
+    "Too many attempts. Wait a moment and try again.",
+    "ಹಲವು ಪ್ರಯತ್ನಗಳಾಗಿವೆ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "बहुत अधिक प्रयास हुए हैं। थोड़ी देर बाद फिर कोशिश करें।");
   if (error.message === "quiz_required_answers") return t("Answer all required questions.", "ಎಲ್ಲ ಕಡ್ಡಾಯ ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರಿಸಿ.", "सभी अनिवार्य प्रश्नों के उत्तर दें।");
   if (error.message === "quiz_not_live") return t("This test is no longer open.", "ಈ ಪರೀಕ್ಷೆ ಈಗ ಲಭ್ಯವಿಲ್ಲ.", "यह परीक्षा अब उपलब्ध नहीं है।");
   if (["quiz_attempt_missing", "quiz_attempt_not_found", "quiz_not_found"].includes(error.message)) return t(
@@ -177,25 +181,23 @@ function adminLink() {
 }
 
 function adminLogin() {
-  const email = h("input", { type: "email", name: "email", autocomplete: "username", required: true });
   const password = h("input", { type: "password", name: "password", autocomplete: "current-password", required: true });
   const error = h("p", { class: "error", role: "alert" });
   const submit = h("button", { type: "submit", class: "button primary" }, t("Sign in", "ಸೈನ್ ಇನ್", "साइन इन करें"));
   return h("div", { class: "stack" }, heading(t("Test Admins", "ಪರೀಕ್ಷಾ ನಿರ್ವಾಹಕರು", "परीक्षा प्रशासक"),
-    t("Sign in with your administrator account to manage tests and view results.", "ಪರೀಕ್ಷೆಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಮತ್ತು ಫಲಿತಾಂಶಗಳನ್ನು ನೋಡಲು ನಿರ್ವಾಹಕ ಖಾತೆಯೊಂದಿಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.", "परीक्षाएँ प्रबंधित करने और परिणाम देखने के लिए अपने प्रशासक खाते से साइन इन करें।")),
+    t("Enter the admin password to manage tests and view results.", "ಪರೀಕ್ಷೆಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಮತ್ತು ಫಲಿತಾಂಶಗಳನ್ನು ನೋಡಲು ನಿರ್ವಾಹಕರ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ.", "परीक्षाएँ प्रबंधित करने और परिणाम देखने के लिए प्रशासक का पासवर्ड दर्ज करें।")),
   h("form", { class: "panel stack narrow", onsubmit: async event => {
     event.preventDefault();
     submit.disabled = true;
     error.textContent = "";
     try {
-      await signIn(email.value.trim(), password.value);
+      await signIn(password.value);
       await render();
     } catch (problem) {
       error.textContent = explainError(problem);
       submit.disabled = false;
     }
-  } }, labelField(t("Email", "ಇಮೇಲ್", "ईमेल"), email),
-  labelField(t("Password", "ಪಾಸ್‌ವರ್ಡ್", "पासवर्ड"), password), submit, error));
+  } }, labelField(t("Admin password", "ನಿರ್ವಾಹಕರ ಪಾಸ್‌ವರ್ಡ್", "प्रशासक का पासवर्ड"), password), submit, error));
 }
 
 const adminRpc = (name, args) => rpc(name, args, { admin: true });
