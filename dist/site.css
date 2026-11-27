@@ -121,46 +121,27 @@ button, select, .choice:has(input), input[type='checkbox'], input[type='radio'] 
 .brand {
   display: inline-flex;
   flex: 0 1 auto;
-  align-items: center;
-  gap: .75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: .25rem;
   min-block-size: 2.75rem;
   text-decoration: none;
   white-space: normal;
 }
 
-.brand-mark {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 2.6rem;
-  inline-size: 2.6rem;
-  block-size: 2.6rem;
-  border-radius: .65rem;
-  background: var(--ink);
-  color: var(--lime);
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.brand-mark:empty::before {
-  content: '';
-  inline-size: 1.05rem;
-  block-size: .62rem;
-  border-block-end: .19rem solid currentColor;
-  border-inline-start: .19rem solid currentColor;
-  transform: translateY(-.12rem) rotate(-45deg);
+.brand-logo {
+  display: block;
+  inline-size: clamp(8.25rem, 22vw, 10.5rem);
+  max-inline-size: 100%;
+  block-size: auto;
 }
 
 .brand-text {
-  display: grid;
-  align-content: center;
-  gap: .07rem;
+  font-size: .9375rem;
   font-weight: 750;
   line-height: 1.18;
 }
-
-.brand-text small { color: var(--muted); font-size: .875rem; font-weight: 600; }
 
 .nav-links {
   display: flex;

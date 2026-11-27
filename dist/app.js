@@ -96,9 +96,10 @@ function shell(path) {
   } }, Object.entries(languages).map(([code, name]) =>
     h("option", { value: code, lang: code, selected: language === code }, name)));
   header.replaceChildren(h("div", { class: "header-inner" },
-    h("a", { class: "brand", href: "#/" }, h("span", { class: "brand-mark", "aria-hidden": "true" }, "VE"),
-      h("span", { class: "brand-text" }, h("strong", {}, t("Quiz Studio", "ಕ್ವಿಜ್ ಸ್ಟುಡಿಯೋ", "क्विज़ स्टूडियो")),
-        h("small", { lang: "en" }, "Vision Empower"))),
+    h("a", { class: "brand", href: "#/" },
+      h("img", { class: "brand-logo", src: new URL("./vision-empower-logo.svg", import.meta.url).href,
+        width: 810, height: 145, alt: "Vision Empower", lang: "en" }),
+      h("strong", { class: "brand-text" }, t("Quiz Studio", "ಕ್ವಿಜ್ ಸ್ಟುಡಿಯೋ", "क्विज़ स्टूडियो"))),
     h("nav", { class: "nav-links", "aria-label": t("Main navigation", "ಮುಖ್ಯ ಸಂಚರಣೆ", "मुख्य नेविगेशन") },
       nav.map(([url, name]) => h("a", {
         href: `#${url}`,
