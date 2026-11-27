@@ -1,8 +1,6 @@
 const projectUrl = "https://echetmjifxcznzsrrnrz.supabase.co";
 const publishableKey = "sb_publishable_6IrZajpmKg-V4IgMbyy_-g_ZohTvZbM";
-const authKey = "ve.quiz.admin";
-const sharedAdminEmail = "quiz-admin@vebebras.example";
-const sharedAdminPasswordPrefix = "QuizStudio-v1:";
+const authKey = "ve.quiz.admin.passcode";
 
 export function readStorage(key) {
   try { return JSON.parse(sessionStorage.getItem(key)); } catch { return null; }
@@ -18,14 +16,12 @@ export function writeStorage(key, value) {
 }
 
 let session = readStorage(authKey);
-let refreshing;
 
-async function request(path, { body, token, keepalive = false } = {}) {
+async function request(path, { body, keepalive = false } = {}) {
   const headers = { apikey: publishableKey, "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
   const payload = body === undefined ? undefined : JSON.stringify(body);
   const response = await fetch(`${projectUrl}${path}`, {
-    method: "POST", headers, body: payload, keepalive: keepalive && payload.length < 30_000,
+    method: "POST", headers, body: payload, keepalive: keepalive && (payload?.length ?? 0) < 30_000,
     cache: "no-store"
   });
   const data = await response.json().catch(() => null);
@@ -39,58 +35,43 @@ async function request(path, { body, token, keepalive = false } = {}) {
 }
 
 function setSession(value) {
-  session = value ? {
-    access_token: value.access_token,
-    refresh_token: value.refresh_token,
-    expires_at: value.expires_at || Math.floor(Date.now() / 1000) + value.expires_in
-  } : null;
+  session = value;
   writeStorage(authKey, session);
 }
 
 export function signedIn() {
-  return Boolean(session);
+  if (!session) return false;
+  if (session.token && Date.parse(session.expires_at) > Date.now()) return true;
+  setSession(null);
+  return false;
 }
 
 export async function signIn(password) {
-  // Match the password format configured on the shared Supabase Auth user.
-  setSession(await request("/auth/v1/token?grant_type=password", {
-    body: { email: sharedAdminEmail, password: sharedAdminPasswordPrefix + password }
-  }));
+  try {
+    setSession(await request("/rest/v1/rpc/quiz_admin_login", { body: { p_passcode: password } }));
+  } catch (error) {
+    if (error.code === "PGRST202") error.code = "quiz_admin_passcode_unset";
+    throw error;
+  }
 }
 
 export async function signOut() {
-  const token = session?.access_token;
+  const token = session?.token;
   setSession(null);
-  if (token) await request("/auth/v1/logout?scope=local", { token }).catch(() => {});
-}
-
-async function adminToken(force = false) {
-  if (!session) throw new Error("quiz_sign_in");
-  if (!force && session.expires_at * 1000 - Date.now() > 60_000) return session.access_token;
-  if (!refreshing) {
-    const current = session;
-    refreshing = request("/auth/v1/token?grant_type=refresh_token", { body: { refresh_token: current.refresh_token } })
-      .then(data => { if (session === current) setSession(data); })
-      .catch(error => {
-        if (session === current && [400, 401, 403].includes(error.status)) setSession(null);
-        throw error;
-      })
-      .finally(() => { refreshing = null; });
+  if (token) {
+    await request("/rest/v1/rpc/quiz_admin_logout", { body: { p_session_token: token }, keepalive: true }).catch(() => {});
   }
-  await refreshing;
-  if (!session) throw new Error("quiz_sign_in");
-  return session.access_token;
 }
 
 export async function rpc(name, body = {}, { admin = false, keepalive = false } = {}) {
   const path = `/rest/v1/rpc/${name}`;
-  const token = admin ? await adminToken() : undefined;
+  if (!admin) return request(path, { body, keepalive });
+  if (!signedIn()) throw new Error("quiz_sign_in");
+  const current = session;
   try {
-    return await request(path, { body, token, keepalive });
+    return await request(path, { body: { ...body, p_session_token: current.token }, keepalive });
   } catch (error) {
-    if (admin && error.status === 401) {
-      return request(path, { body, token: await adminToken(true), keepalive });
-    }
+    if (error.status === 401 && session === current) setSession(null);
     throw error;
   }
 }

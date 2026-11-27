@@ -58,14 +58,18 @@ function quizMeta(quiz) {
 }
 
 function explainError(error) {
+  if (error.code === "quiz_admin_passcode_unset") return t(
+    "Admin sign-in is awaiting setup. Ask the project owner to install the passcode migration and set a passcode.",
+    "ನಿರ್ವಾಹಕರ ಸೈನ್ ಇನ್ ಇನ್ನೂ ಸಿದ್ಧವಾಗಿಲ್ಲ. ಪಾಸ್‌ಕೋಡ್ ಮೈಗ್ರೇಷನ್ ಮಾಡಿ ಪಾಸ್‌ಕೋಡ್ ಹೊಂದಿಸಲು ಯೋಜನೆಯ ಮಾಲೀಕರನ್ನು ಕೇಳಿ.",
+    "प्रशासक साइन-इन अभी तैयार नहीं है। प्रोजेक्ट के मालिक से पासकोड माइग्रेशन लागू करने और पासकोड सेट करने को कहें।");
   if (error.code === "PGRST202") return t(
     `${studioName()} is awaiting database setup. Ask a test administrator to complete setup.`,
     `${studioName()}ದ ಡೇಟಾಬೇಸ್ ಇನ್ನೂ ಸಿದ್ಧವಾಗಿಲ್ಲ. ಸೆಟಪ್ ಪೂರ್ಣಗೊಳಿಸಲು ಪರೀಕ್ಷಾ ನಿರ್ವಾಹಕರನ್ನು ಕೇಳಿ.`,
     `${studioName()} का डेटाबेस अभी तैयार नहीं है। सेटअप पूरा करने के लिए परीक्षा प्रशासक से कहें।`);
   if (error.code === "42501" || error.status === 403) return t(
-    "This account is not authorized to administer tests.",
-    "ಈ ಖಾತೆಗೆ ಪರೀಕ್ಷೆಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅನುಮತಿ ಇಲ್ಲ.",
-    "इस खाते को परीक्षाएँ प्रबंधित करने की अनुमति नहीं है।");
+    "Access to test administration is unavailable.",
+    "ಪರೀಕ್ಷಾ ನಿರ್ವಹಣೆಗೆ ಪ್ರವೇಶ ಲಭ್ಯವಿಲ್ಲ.",
+    "परीक्षा प्रबंधन की अनुमति उपलब्ध नहीं है।");
   if (error.code === "invalid_credentials" || /invalid login/i.test(error.message)) return t(
     "Check the admin password and try again.",
     "ನಿರ್ವಾಹಕರ ಪಾಸ್‌ವರ್ಡ್ ಪರಿಶೀಲಿಸಿ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
@@ -81,7 +85,7 @@ function explainError(error) {
     "ಇದು ಲಭ್ಯವಿಲ್ಲ. ಮುಂದುವರಿಯಲು ಪರೀಕ್ಷೆಗಳ ಪಟ್ಟಿಯನ್ನು ತೆರೆಯಿರಿ.",
     "यह उपलब्ध नहीं है। जारी रखने के लिए परीक्षाओं की सूची खोलें।");
   if (error.message === "quiz_sign_in" || error.status === 401) return t(
-    "Sign in to continue.", "ಮುಂದುವರಿಯಲು ಸೈನ್ ಇನ್ ಮಾಡಿ.", "जारी रखने के लिए साइन इन करें।");
+    "Sign in again to continue.", "ಮುಂದುವರಿಯಲು ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.", "जारी रखने के लिए फिर से साइन इन करें।");
   return t("We couldn't complete that request. Please try again.",
     "ವಿನಂತಿಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ।",
     "अनुरोध पूरा नहीं हो सका। कृपया फिर कोशिश करें।");
@@ -366,7 +370,7 @@ async function render({ focus = "heading" } = {}) {
       h("div", { class: "panel stack" }, h("p", {}, explainError(error)),
         h("div", { class: "row" },
           button(t("Try again", "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ", "फिर कोशिश करें"), () => render(), "primary"),
-          admin && signedIn() ? signOutButton() : link(t("Browse live tests", "ಸಕ್ರಿಯ ಪರೀಕ್ಷೆಗಳನ್ನು ನೋಡಿ", "उपलब्ध परीक्षाएँ देखें"), "/takers"))));
+          admin ? (signedIn() ? signOutButton() : adminLink()) : link(t("Browse live tests", "ಸಕ್ರಿಯ ಪರೀಕ್ಷೆಗಳನ್ನು ನೋಡಿ", "उपलब्ध परीक्षाएँ देखें"), "/takers"))));
   }
   if (current !== rendered) return;
   main.replaceChildren(content);

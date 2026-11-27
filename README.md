@@ -4,22 +4,20 @@ Create and publish multilingual tests, run timed or untimed attempts, and review
 
 ## Set up Supabase
 
-1. Sign in to the [project SQL editor](https://supabase.com/dashboard/project/echetmjifxcznzsrrnrz/sql/new) with a project role that can run migrations. Apply `supabase/migrations/202611260001_quiz_platform.sql` once. It creates the quiz schema, API functions, access rules, and a Cron job that finalizes expired attempts even if the browser is closed. A linked Supabase CLI can also apply it with `supabase db push`.
-2. In **Authentication → Users**, use **Create new user** with **Auto Confirm User** enabled to create the shared account `quiz-admin@vebebras.example`. Set its Supabase password to `QuizStudio-v1:<shared password>` (replace the placeholder with the exact password admins will type, keeping the prefix and omitting the angle brackets). The prefix accommodates Supabase's minimum password length. Use the Auth user UUID to grant this account access:
+1. Sign in to the [project SQL editor](https://supabase.com/dashboard/project/echetmjifxcznzsrrnrz/sql/new). If this is a new database, run [the quiz schema migration](supabase/migrations/202611260001_quiz_platform.sql) once. It sets up the quiz API, storage, and automatic submission job. If quizzes are already set up, start with step 2.
+2. Run [the passcode migration](supabase/migrations/202611270001_quiz_admin_passcode.sql) once. In the SQL Editor, replace the placeholder below with the password you want admins to enter. Run the same statement when you need to rotate the password.
 
    ```sql
-   insert into public.quiz_admins (user_id)
-   values ('REPLACE_WITH_AUTH_USER_UUID')
-   on conflict do nothing;
+   select quiz_private.set_admin_passcode('REPLACE_WITH_YOUR_SHARED_PASSWORD');
    ```
 
-3. Open **Test Admins** and enter the shared password by itself. Create a test and save it as **Live** when ready. Smoke-test it from **Test Takers** and download the resulting CSV from the admin dashboard.
+3. Open **Test Admins** and enter the password you set. Test administrators need only this password. Create a test, save it as **Live**, and check that you can submit it from **Test Takers** and download results.
 
-The browser sends the prefixed password directly to Supabase Auth. Keep the shared password, database passwords, Supabase Management API tokens and secret or service-role keys out of frontend source. The shared account can manage all quizzes and view their results once it is on the allowlist. Test takers enter a display name, and submissions count attempts because test takers do not authenticate.
+Supabase stores a salted password hash and issues expiring admin sessions. Rotating the password signs out existing admin sessions. Keep the passcode and server credentials out of frontend source. Anyone with the shared password can manage tests and see results. Test takers enter a display name, and submissions count attempts because test takers do not authenticate.
 
 ## Run and deploy
 
-Run `npx serve .` from the repository root and open the URL it prints. On GitHub Pages, choose **Settings → Pages → Deploy from a branch**, then select `main` and `/(root)`. GitHub Pages uses the root `index.html` and serves the existing frontend directly. Visitors can open a public deployment and browse tests without a ChatGPT account. Test admins sign in through Supabase.
+Run `npx serve .` from the repository root and open the URL it prints. On GitHub Pages, choose **Settings → Pages → Deploy from a branch**, then select `main` and `/(root)`. GitHub Pages uses the root `index.html` and serves the existing frontend directly. Visitors can open a public deployment and browse tests without a ChatGPT account. Test admins use the shared password configured in Supabase.
 
 Deploy over HTTPS. Hash-based routing works under a repository path and requires no server route rewrites.
 
