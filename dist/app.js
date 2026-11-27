@@ -18,6 +18,10 @@ function t(en, kn, hi) {
   return { en, kn, hi }[language] || en;
 }
 
+function studioName() {
+  return t("Inclusive Assessment Studio", "ಸಮಾವೇಶಿ ಮೌಲ್ಯಮಾಪನ ಸ್ಟುಡಿಯೋ", "समावेशी आकलन स्टूडियो");
+}
+
 function localText(content) {
   if (content?.[language]) return { lang: language, text: content[language] };
   return { lang: "en", text: content?.en || "" };
@@ -55,9 +59,9 @@ function quizMeta(quiz) {
 
 function explainError(error) {
   if (error.code === "PGRST202") return t(
-    "Quiz Studio is awaiting database setup. Ask a test administrator to complete setup.",
-    "ಕ್ವಿಜ್ ಸ್ಟುಡಿಯೋದ ಡೇಟಾಬೇಸ್ ಇನ್ನೂ ಸಿದ್ಧವಾಗಿಲ್ಲ. ಸೆಟಪ್ ಪೂರ್ಣಗೊಳಿಸಲು ಪರೀಕ್ಷಾ ನಿರ್ವಾಹಕರನ್ನು ಕೇಳಿ.",
-    "क्विज़ स्टूडियो का डेटाबेस अभी तैयार नहीं है। सेटअप पूरा करने के लिए परीक्षा प्रशासक से कहें।");
+    `${studioName()} is awaiting database setup. Ask a test administrator to complete setup.`,
+    `${studioName()}ದ ಡೇಟಾಬೇಸ್ ಇನ್ನೂ ಸಿದ್ಧವಾಗಿಲ್ಲ. ಸೆಟಪ್ ಪೂರ್ಣಗೊಳಿಸಲು ಪರೀಕ್ಷಾ ನಿರ್ವಾಹಕರನ್ನು ಕೇಳಿ.`,
+    `${studioName()} का डेटाबेस अभी तैयार नहीं है। सेटअप पूरा करने के लिए परीक्षा प्रशासक से कहें।`);
   if (error.code === "42501" || error.status === 403) return t(
     "This account is not authorized to administer tests.",
     "ಈ ಖಾತೆಗೆ ಪರೀಕ್ಷೆಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅನುಮತಿ ಇಲ್ಲ.",
@@ -103,7 +107,7 @@ function shell(path) {
     h("a", { class: "brand", href: "#/" },
       h("img", { class: "brand-logo", src: new URL("./vision-empower-logo.svg", import.meta.url).href,
         width: 810, height: 145, alt: "Vision Empower", lang: "en" }),
-      h("strong", { class: "brand-text" }, t("Quiz Studio", "ಕ್ವಿಜ್ ಸ್ಟುಡಿಯೋ", "क्विज़ स्टूडियो"))),
+      h("strong", { class: "brand-text" }, studioName())),
     h("nav", { class: "nav-links", "aria-label": t("Main navigation", "ಮುಖ್ಯ ಸಂಚರಣೆ", "मुख्य नेविगेशन") },
       nav.map(([url, name]) => h("a", {
         href: `#${url}`,
@@ -112,7 +116,7 @@ function shell(path) {
     h("div", { class: "language-field" }, h("label", { for: locale.id }, t("Language", "ಭಾಷೆ", "भाषा")), locale)));
   footer.replaceChildren(h("div", { class: "footer-inner" },
     h("strong", { lang: "en" }, "Vision Empower"),
-    h("span", {}, t("Quiz Studio", "ಕ್ವಿಜ್ ಸ್ಟುಡಿಯೋ", "क्विज़ स्टूडियो"))));
+    h("span", {}, studioName())));
 }
 
 function home() {
@@ -126,10 +130,10 @@ function home() {
   return h("div", { class: "home" },
     h("section", { class: "hero", "aria-labelledby": "home-title" },
       h("div", { class: "hero-copy" },
-        h("p", { class: "eyebrow" }, t("VISION EMPOWER · QUIZ STUDIO", "ವಿಷನ್ ಎಂಪವರ್ · ಕ್ವಿಜ್ ಸ್ಟುಡಿಯೋ", "विज़न एम्पावर · क्विज़ स्टूडियो")),
+        h("p", { class: "eyebrow" }, `${t("Vision Empower", "ವಿಷನ್ ಎಂಪವರ್", "विज़न एम्पावर")} · ${studioName()}`),
         h("h1", { id: "home-title", tabindex: "-1" },
-          t("Build a quiz.", "ರಸಪ್ರಶ್ನೆ ರಚಿಸಿ.", "क्विज़ बनाएँ।"), " ",
-          h("span", { class: "hero-accent" }, t("Open it to learners.", "ಕಲಿಯುವವರಿಗೆ ತೆರೆಯಿರಿ.", "इसे शिक्षार्थियों के लिए खोलें।"))),
+          t("Inclusive Assessments", "ಎಲ್ಲ ಕಲಿಯುವವರಿಗೂ", "सभी शिक्षार्थियों के लिए"), " ",
+          h("span", { class: "hero-accent" }, t("For All Learners", "ಸಮಾವೇಶಿ ಮೌಲ್ಯಮಾಪನಗಳು", "समावेशी आकलन"))),
         h("p", { class: "hero-intro" }, t(
           "Create multilingual tests, run timed or untimed attempts, and download results in one place.",
           "ಬಹುಭಾಷಾ ಪರೀಕ್ಷೆಗಳನ್ನು ರಚಿಸಿ, ಸಮಯ ಮಿತಿಯೊಂದಿಗೆ ಅಥವಾ ಸಮಯ ಮಿತಿಯಿಲ್ಲದೆ ನಡೆಸಿ, ಫಲಿತಾಂಶಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.",
@@ -374,7 +378,7 @@ async function render({ focus = "heading" } = {}) {
       window.scrollTo(0, 0);
     }
   }
-  const brand = t("Quiz Studio", "ಕ್ವಿಜ್ ಸ್ಟುಡಿಯೋ", "क्विज़ स्टूडियो");
+  const brand = studioName();
   document.title = path === "/" ? `${brand} · Vision Empower` : `${title?.textContent || brand} · ${brand}`;
 }
 

@@ -1,4 +1,4 @@
-# Vision Empower Quiz Studio
+# Vision Empower Inclusive Assessment Studio
 
 Create and publish multilingual tests, run timed or untimed attempts, and review and export submissions. The landing page is `index.html` at the repository root and its frontend assets are in `dist/`. Supabase stores quizzes, attempts and results, authenticates test admins, and enforces deadlines and access rules.
 
